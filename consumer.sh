@@ -1,0 +1,1 @@
+spark-submit --class kafka.ConsumerLogs --master yarn --deploy-mode client --num-executors 2 --executor-memory 1g --executor-cores 1 --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.1 target/bigdata-project-1.0-SNAPSHOT-jar-with-dependencies.jar
