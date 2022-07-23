@@ -10,9 +10,9 @@ import static org.apache.spark.sql.functions.*;
 public class Task {
     private SparkSession spark;
 
-    private final String sourcePath = "hdfs:/dataKafka";
+    private final String sourcePath = "hdfs:/bigdata-project/data";
 
-    private final String destinationPath = "hdfs:/result";
+    private final String destinationPath = "hdfs:/bigdata-project/result";
 
     public Task(String appName) {
         this.spark = SparkSession.builder()
@@ -40,6 +40,7 @@ public class Task {
                     .agg(count("*").as("count"))
                     .orderBy(desc("count"));
 
+            System.out.println("Top 10 bài hát được xem nhiều nhất (lấy các trường page = NextSong)");
             res.show(false);
 
             res.coalesce(1)
@@ -67,6 +68,7 @@ public class Task {
                     .agg(count("*").as("count"))
                     .orderBy(desc("count"));
 
+            System.out.println("Danh sách người dùng truy cập nhiều nhất trong ngày");
             res.show(false);
 
             res.coalesce(1)
@@ -94,6 +96,7 @@ public class Task {
                     .agg(count("*").as("count"))
                     .orderBy(desc("count"));
 
+            System.out.println("Top 10 thành phố có lượt truy cập nhiều nhất");
             res.show(false);
 
             res.coalesce(1)

@@ -11,7 +11,7 @@ import static org.apache.spark.sql.functions.col;
 public class ConsumerLogs implements Common {
     private SparkSession spark;
 
-    private final String destination = "hdfs://m1:8020/data";
+    private final String destination = "/bigdata-project/data";
 
     public void readData() {
         Dataset<Row> df = spark.read()
@@ -24,7 +24,6 @@ public class ConsumerLogs implements Common {
                 .load()
                 .selectExpr("CAST(value AS STRING) AS value");
 
-//        df.write().format("parquet").save(System.getProperty("user.dir") + "/dataKafka");
         df = df.select(split(col("value"), "\t").as("split(value)"));
 
 //        df.show(false);
@@ -111,7 +110,7 @@ public class ConsumerLogs implements Common {
 
         midDF.show();
 
-        midDF.write().format("parquet").partitionBy("year", "month", "day").save( "hdfs:/dataKafka");
+        midDF.write().partitionBy("year", "month", "day").parquet(destination);
     }
 
     public void run() {
