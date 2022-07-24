@@ -4,6 +4,10 @@ import common.Common;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.streaming.StreamingQueryException;
+import org.apache.spark.sql.streaming.Trigger;
+
+import java.util.concurrent.TimeoutException;
 
 import static org.apache.spark.sql.functions.split;
 import static org.apache.spark.sql.functions.col;
@@ -11,16 +15,18 @@ import static org.apache.spark.sql.functions.col;
 public class ConsumerLogs implements Common {
     private SparkSession spark;
 
-    private final String destination = "/bigdata-project/data";
+    private final String destination = "/bigdata-project/data-stream";
 
-    public void readData() {
-        Dataset<Row> df = spark.read()
+    private final String checkpoint = "/tmp/bigdata_project/checkpoint";
+
+    public Dataset<Row> readData() {
+        Dataset<Row> df = spark.readStream()
                 .format("kafka")
                 .option("kafka.bootstrap.servers", kafkaServer)
                 .option("subscribe", topic)
                 .option("failOnDataLoss", "false")
-                .option("startingOffsets", "earliest")
-                .option("endingOffsets", "latest")
+//                .option("startingOffsets", "earliest")
+//                .option("endingOffsets", "latest")
                 .load()
                 .selectExpr("CAST(value AS STRING) AS value");
 
@@ -107,10 +113,27 @@ public class ConsumerLogs implements Common {
                 .withColumn("year", col("ts").substr(0, 4))
                 .withColumn("month", col("ts").substr(6, 2))
                 .withColumn("day", col("ts").substr(9, 2));
+//
+//        midDF.write().partitionBy("year", "month", "day").parquet(destination);
+        return midDF;
+    }
 
-        midDF.show();
+    public void writeData() {
+        Dataset<Row> df = this.readData();
 
-        midDF.write().partitionBy("year", "month", "day").parquet(destination);
+        try {
+            df.coalesce(1).writeStream()
+                    .trigger(Trigger.ProcessingTime("1 minute"))
+                    .partitionBy("year", "month", "day")
+                    .format("parquet")
+                    .option("path", destination)
+                    .option("checkpointLocation", checkpoint)
+                    .outputMode("append")
+                    .start()
+                    .awaitTermination();
+        } catch (TimeoutException | StreamingQueryException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void run() {
@@ -120,7 +143,7 @@ public class ConsumerLogs implements Common {
                 .getOrCreate();
         this.spark.sparkContext().setLogLevel("ERROR");
 
-        readData();
+        writeData();
     }
 
     public static void main(String[] args) {

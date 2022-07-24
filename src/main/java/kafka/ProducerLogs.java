@@ -115,7 +115,7 @@ public class ProducerLogs implements Common {
                             recordMetadata.offset()));
                 }
 
-                Thread.sleep(1000);
+                Thread.sleep(250);
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());

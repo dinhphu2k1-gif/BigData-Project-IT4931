@@ -40,7 +40,7 @@ public class Task {
                     .agg(count("*").as("count"))
                     .orderBy(desc("count"));
 
-            System.out.println("Top 10 bài hát được xem nhiều nhất (lấy các trường page = NextSong)");
+            System.out.println("Top 10 bài hát được xem nhiều nhất trong ngày" + day + "/06/2015");
             res.show(false);
 
             res.coalesce(1)
@@ -68,7 +68,7 @@ public class Task {
                     .agg(count("*").as("count"))
                     .orderBy(desc("count"));
 
-            System.out.println("Danh sách người dùng truy cập nhiều nhất trong ngày");
+            System.out.println("Danh sách người dùng truy cập nhiều nhất trong ngày" + day + "/06/2015");
             res.show(false);
 
             res.coalesce(1)
@@ -96,7 +96,7 @@ public class Task {
                     .agg(count("*").as("count"))
                     .orderBy(desc("count"));
 
-            System.out.println("Top 10 thành phố có lượt truy cập nhiều nhất");
+            System.out.println("Top 10 thành phố có lượt truy cập nhiều nhất:" + day + "/06/2015");
             res.show(false);
 
             res.coalesce(1)
